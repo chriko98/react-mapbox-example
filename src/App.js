@@ -4,6 +4,7 @@ import mapboxgl from "mapbox-gl";
 
 import fetchFakeData from "./api/fetchFakeData";
 import Popup from "./components/Popup";
+import Marker from "./components/Marker";
 import "./App.css";
 
 mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_ACCESS_TOKEN;
@@ -24,7 +25,7 @@ const App = () => {
 
     // add navigation control (zoom buttons)
     map.addControl(new mapboxgl.NavigationControl(), "bottom-right");
-
+/*
     map.on("load", () => {
       // add the data source for new a feature collection with no features
       map.addSource("random-points-data", {
@@ -47,7 +48,7 @@ const App = () => {
         }
       });
     });
-
+*//*
     map.on("moveend", async () => {
       // get new center coordinates
       const { lng, lat } = map.getCenter();
@@ -84,6 +85,28 @@ const App = () => {
           .addTo(map);
       }
     });
+*/
+
+    map.on('moveend', async () => {
+      // get center coordinates
+      const { lng, lat } = map.getCenter();
+      // fetch new data
+      const results = await fetchFakeData({ longitude: lng, latitude: lat });
+      // iterate through the feature collection and append marker to the map for each feature
+      results.features.forEach(result => {
+        const { id, geometry } = result;
+        // create marker node
+        const markerNode = document.createElement('div');
+        ReactDOM.render(<Marker id={id} />, markerNode);
+        // add marker to map
+        new mapboxgl.Marker(markerNode)
+            .setLngLat(geometry.coordinates)
+            .addTo(map);
+      });
+    });
+
+
+
 
     // clean up on unmount
     return () => map.remove();
